@@ -140,12 +140,12 @@ export async function getAppUsage(date: string) {
   const result = await pool.query(
     `SELECT
        LOWER(app_name) as app_name,
-       category,
+       (array_agg(category ORDER BY duration_seconds DESC))[1] as category,
        SUM(duration_seconds) as total_seconds,
        COUNT(*) as sessions
      FROM focus_events
      WHERE date = $1 AND ended_at IS NOT NULL
-     GROUP BY LOWER(app_name), category
+     GROUP BY LOWER(app_name)
      ORDER BY total_seconds DESC`,
     [date]
   );

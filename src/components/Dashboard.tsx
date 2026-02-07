@@ -186,6 +186,17 @@ export default function Dashboard() {
     setDate(getDateString(new Date()));
   };
 
+  const cats = summary?.categories || {
+    productive: 0,
+    communication: 0,
+    browsing: 0,
+    entertainment: 0,
+    other: 0,
+  };
+
+  // Fire browser notifications based on settings (must be before any early return)
+  useNotifications(settings, summary, cats);
+
   if (isLoading && !summary) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -196,17 +207,6 @@ export default function Dashboard() {
       </div>
     );
   }
-
-  const cats = summary?.categories || {
-    productive: 0,
-    communication: 0,
-    browsing: 0,
-    entertainment: 0,
-    other: 0,
-  };
-
-  // Fire browser notifications based on settings
-  useNotifications(settings, summary, cats);
 
   return (
     <div className="min-h-screen" style={{ padding: "2rem 6vw" }}>

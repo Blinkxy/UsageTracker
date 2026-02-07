@@ -54,7 +54,7 @@ export default function AppUsageList({ apps }: AppUsageListProps) {
 
           return (
             <div
-              key={app.appName}
+              key={`${app.appName}-${index}`}
               className="group relative grid grid-cols-[1fr_100px_80px_60px_80px] gap-2 px-3 py-2.5 rounded-lg hover:bg-surface-hover transition-colors items-center"
             >
               {/* Background progress bar with gradient fade */}
