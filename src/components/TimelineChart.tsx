@@ -66,11 +66,8 @@ export default function TimelineChart({
       );
     }
   } else {
-    const currentHour = new Date().getHours();
-    const activeHours = hours.filter(
-      (h) => h.hour <= currentHour + 1 && h.hour >= 6
-    );
-    if (activeHours.length === 0 || activeHours.every((h) => h.total === 0)) {
+    const hasAnyData = hours.some((h) => h.total > 0);
+    if (!hasAnyData) {
       return (
         <Card className="h-full">
           <CardHeader className="flex flex-row items-center justify-between pb-4">
@@ -155,7 +152,7 @@ export default function TimelineChart({
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={days}
-                margin={{ top: 5, right: 5, left: -10, bottom: 0 }}
+                margin={{ top: 5, right: 20, left: -10, bottom: 0 }}
               >
                 <defs>
                   <linearGradient id="gradDailyProductive" x1="0" y1="0" x2="0" y2="1">
@@ -204,9 +201,21 @@ export default function TimelineChart({
   }
 
   // ── Hourly (today) view ──
+  // Find the range of hours to display: from earliest active hour (or 6 AM)
+  // up to the current hour, whichever spans wider
   const currentHour = new Date().getHours();
+  const hoursWithData = hours.filter((h) => h.total > 0);
+  const firstActiveHour = hoursWithData.length > 0
+    ? Math.min(...hoursWithData.map((h) => h.hour))
+    : 6;
+  const lastActiveHour = hoursWithData.length > 0
+    ? Math.max(...hoursWithData.map((h) => h.hour))
+    : currentHour;
+  const rangeStart = Math.min(firstActiveHour, 6);
+  const rangeEnd = Math.max(lastActiveHour, currentHour) + 1;
+
   const activeHours = hours.filter(
-    (h) => h.hour <= currentHour + 1 && h.hour >= 6
+    (h) => h.hour >= rangeStart && h.hour <= rangeEnd
   );
 
   const chartData = activeHours.map((h) => ({
@@ -230,7 +239,7 @@ export default function TimelineChart({
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={chartData}
-              margin={{ top: 5, right: 5, left: -20, bottom: 0 }}
+              margin={{ top: 5, right: 20, left: -20, bottom: 0 }}
             >
               <defs>
                 <linearGradient id="gradProductive" x1="0" y1="0" x2="0" y2="1">

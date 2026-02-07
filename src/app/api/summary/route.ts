@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  getDailySummary,
-  getProductiveAppSecondsFromSettings,
-  getSettings,
-} from "@/lib/db";
+import { getDailySummary } from "@/lib/db";
 import { calculateProductivityScore, getTodayDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -13,12 +9,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const date = searchParams.get("date") || getTodayDate();
 
-    const settings = await getSettings();
     const summary = await getDailySummary(date);
-    const productiveSeconds = await getProductiveAppSecondsFromSettings(
-      date,
-      settings.productiveApps
-    );
+
+    // Productivity score is now based on the "productive" category
+    // (classified by window title content, not app name)
+    const productiveSeconds = summary.categories.productive || 0;
     const productivityScore = calculateProductivityScore(
       productiveSeconds,
       summary.totalSeconds

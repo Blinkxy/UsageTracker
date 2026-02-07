@@ -171,12 +171,12 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen" style={{ padding: "2rem 6vw" }}>
       {/* Header */}
-      <header className="mb-8">
+      <header className="mb-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight flex items-center gap-3">
               <span className="bg-gradient-to-r from-accent to-productive bg-clip-text text-transparent">
-                Usage Tracker
+                Activity Tracker
               </span>
               {isToday && (
                 <span className="flex items-center gap-1.5 text-xs font-normal text-productive">
@@ -251,8 +251,8 @@ export default function Dashboard() {
 
       {/* Stat cards */}
       <div
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-        style={{ marginBottom: "3.5rem" }}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+        style={{ marginBottom: "2.5rem" }}
       >
         <StatCard
           title="Total Screen Time"
@@ -298,22 +298,22 @@ export default function Dashboard() {
 
       {/* Main grid: Score + Category + Top Apps */}
       <div
-        className="grid grid-cols-1 lg:grid-cols-12 gap-6"
-        style={{ marginBottom: "3.5rem" }}
+        className="grid grid-cols-1 lg:grid-cols-12 gap-5"
+        style={{ marginBottom: "2.5rem" }}
       >
         <div className="lg:col-span-3">
           <ProductivityScore score={summary?.productivityScore || 0} />
         </div>
-        <div className="lg:col-span-4">
+        <div className="lg:col-span-5">
           <CategoryChart categories={cats} />
         </div>
-        <div className="lg:col-span-5">
+        <div className="lg:col-span-4">
           <TopAppsChart apps={usage?.apps || []} />
         </div>
       </div>
 
       {/* Timeline */}
-      <div style={{ marginBottom: "3.5rem" }}>
+      <div style={{ marginBottom: "2.5rem" }}>
         <TimelineChart
           hours={timeline?.hours || []}
           days={timelineDays}
@@ -324,8 +324,8 @@ export default function Dashboard() {
 
       {/* Alerts + App list */}
       <div
-        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
-        style={{ marginBottom: "3.5rem" }}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-5"
+        style={{ marginBottom: "2.5rem" }}
       >
         <div className="lg:col-span-1">
           <DistractionAlerts
@@ -345,7 +345,7 @@ export default function Dashboard() {
 
       {/* Footer */}
       <footer className="text-center text-text-muted text-xs py-4 border-t border-border">
-        Usage Tracker — Productivity monitoring for Linux
+        Activity Tracker — Productivity monitoring for Linux
       </footer>
 
       {/* Settings Modal */}

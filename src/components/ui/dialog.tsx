@@ -58,11 +58,12 @@ DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({
   className,
+  children,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "sticky top-0 z-10 flex items-center justify-between border-b border-border px-6 py-4",
+      "sticky top-0 z-10 flex items-center justify-between border-b border-border px-6 py-4 relative",
       className
     )}
     style={{
@@ -70,7 +71,16 @@ const DialogHeader = ({
         "linear-gradient(145deg, rgba(18,18,26,0.98), rgba(26,26,46,0.95))",
     }}
     {...props}
-  />
+  >
+    {children}
+    <div
+      className="absolute bottom-0 left-0 right-0 h-px"
+      style={{
+        background:
+          "linear-gradient(90deg, transparent, rgba(139,92,246,0.4), rgba(34,197,94,0.3), rgba(59,130,246,0.4), transparent)",
+      }}
+    />
+  </div>
 );
 DialogHeader.displayName = "DialogHeader";
 

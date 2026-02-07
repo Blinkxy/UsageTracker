@@ -34,10 +34,10 @@ export default function AppUsageList({ apps }: AppUsageListProps) {
         </span>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="overflow-hidden">
         <div className="space-y-1">
           {/* Header */}
-          <div className="grid grid-cols-[1fr_100px_80px_60px_80px] gap-2 px-3 py-2 text-xs text-text-muted font-medium">
+          <div className="grid grid-cols-[1fr_70px_55px_50px_80px] gap-1.5 px-3 py-2 text-xs text-text-muted font-medium">
             <span>Application</span>
             <span className="text-right">Time</span>
             <span className="text-right">Share</span>
@@ -54,7 +54,7 @@ export default function AppUsageList({ apps }: AppUsageListProps) {
             return (
               <div
                 key={`${app.appName}-${index}`}
-                className="group relative grid grid-cols-[1fr_100px_80px_60px_80px] gap-2 px-3 py-2.5 rounded-lg hover:bg-surface-hover transition-colors items-center"
+                className="group relative grid grid-cols-[1fr_70px_55px_50px_80px] gap-1.5 px-3 py-2.5 rounded-lg hover:bg-surface-hover transition-colors items-center"
               >
                 {/* Background progress bar with gradient fade */}
                 <div

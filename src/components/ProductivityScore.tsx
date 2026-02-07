@@ -16,12 +16,12 @@ export default function ProductivityScore({ score }: ProductivityScoreProps) {
   const offset = circumference - (score / 100) * circumference;
 
   return (
-    <Card className="h-full flex flex-col items-center justify-center py-6">
-      <CardHeader className="pb-4">
-        <CardTitle>Productivity Score</CardTitle>
+    <Card className="h-full flex flex-col items-center pt-2 pb-2">
+      <CardHeader className="pb-0">
+        <CardTitle className="text-center">Productivity Score</CardTitle>
       </CardHeader>
 
-      <CardContent className="flex flex-col items-center">
+      <CardContent className="flex-1 flex flex-col items-center justify-center">
         <div className="relative w-36 h-36">
           {/* Outer glow behind the ring */}
           <div

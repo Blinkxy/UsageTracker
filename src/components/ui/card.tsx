@@ -8,7 +8,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "relative overflow-hidden rounded-2xl border border-border p-6 transition-all duration-300",
+      "relative rounded-2xl border border-border p-6 transition-all duration-300",
       "backdrop-blur-xl",
       "shadow-[0_4px_24px_rgba(0,0,0,0.3),0_1px_2px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.03)]",
       "hover:border-border-light hover:shadow-[0_8px_32px_rgba(0,0,0,0.4),0_2px_4px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.05)] hover:-translate-y-px",
@@ -23,7 +23,7 @@ const Card = React.forwardRef<
   >
     {/* Top shine line */}
     <div
-      className="pointer-events-none absolute top-0 left-0 right-0 h-px"
+      className="pointer-events-none absolute top-0 left-0 right-0 h-px overflow-hidden rounded-t-2xl"
       style={{
         background:
           "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 30%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.06) 70%, transparent 100%)",
@@ -53,7 +53,7 @@ const CardTitle = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "text-sm font-medium text-text-secondary",
+      "text-sm font-bold text-text-primary",
       className
     )}
     {...props}

@@ -19,9 +19,12 @@ interface TopAppsChartProps {
 }
 
 export default function TopAppsChart({ apps }: TopAppsChartProps) {
-  // Show top 8 apps
+  // Show top 8 apps, truncate long names for chart readability
   const topApps = apps.slice(0, 8).map((app) => ({
-    name: app.displayName,
+    name:
+      app.displayName.length > 14
+        ? app.displayName.slice(0, 13) + "..."
+        : app.displayName,
     seconds: app.totalSeconds,
     color: CATEGORY_COLORS[app.category as Category] || CATEGORY_COLORS.other,
     category: app.category,
@@ -31,7 +34,7 @@ export default function TopAppsChart({ apps }: TopAppsChartProps) {
     return (
       <Card className="h-full">
         <CardHeader>
-          <CardTitle>Top Applications</CardTitle>
+          <CardTitle className="text-center">Top Applications</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-48 text-text-muted text-sm">
           No data yet — start the tracker to see your top apps.
@@ -72,18 +75,18 @@ export default function TopAppsChart({ apps }: TopAppsChartProps) {
   };
 
   return (
-    <Card className="h-full">
+    <Card className="h-full flex flex-col">
       <CardHeader>
-        <CardTitle>Top Applications</CardTitle>
+        <CardTitle className="text-center">Top Applications</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="h-64">
+      <CardContent className="flex-1 flex items-center">
+        <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={topApps}
               layout="vertical"
-              margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
-              barSize={20}
+              margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+              barSize={18}
             >
               <XAxis
                 type="number"
@@ -95,8 +98,8 @@ export default function TopAppsChart({ apps }: TopAppsChartProps) {
               <YAxis
                 type="category"
                 dataKey="name"
-                width={100}
-                tick={{ fill: "#a1a1aa", fontSize: 12 }}
+                width={90}
+                tick={{ fill: "#a1a1aa", fontSize: 11 }}
                 axisLine={false}
                 tickLine={false}
               />

@@ -46,8 +46,9 @@ export function formatDurationPrecise(totalSeconds: number): string {
 
 /**
  * Calculate productivity score (0–100).
- * Based on time spent in productive apps (Brave + Cursor) vs total tracked time.
- * Only Brave and Cursor contribute to productivity; everything else is non-productive.
+ * Based on time classified as the "productive" category vs total tracked time.
+ * Classification is done by window title analysis (coding, documentation, etc.),
+ * not by app name — so YouTube on Brave counts as entertainment, not productive.
  */
 export function calculateProductivityScore(
   productiveSeconds: number,

@@ -27,7 +27,7 @@ export default function CategoryChart({ categories }: CategoryChartProps) {
     return (
       <Card className="h-full">
         <CardHeader>
-          <CardTitle>Category Breakdown</CardTitle>
+          <CardTitle className="text-center">Category Breakdown</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-48 text-text-muted text-sm">
           No data yet — start the tracker to see your categories.
@@ -55,14 +55,14 @@ export default function CategoryChart({ categories }: CategoryChartProps) {
   };
 
   return (
-    <Card className="h-full">
+    <Card className="h-full flex flex-col">
       <CardHeader>
-        <CardTitle>Category Breakdown</CardTitle>
+        <CardTitle className="text-center">Category Breakdown</CardTitle>
       </CardHeader>
 
-      <CardContent>
-        <div className="flex items-center gap-4">
-          <div className="w-44 h-44 flex-shrink-0 relative">
+      <CardContent className="flex-1 flex items-center justify-center">
+        <div className="flex items-center gap-5">
+          <div className="w-32 h-32 flex-shrink-0 relative">
             {/* Glow behind the donut */}
             <div
               className="absolute inset-4 rounded-full blur-2xl opacity-20"
@@ -97,8 +97,8 @@ export default function CategoryChart({ categories }: CategoryChartProps) {
                   data={data}
                   cx="50%"
                   cy="50%"
-                  innerRadius={45}
-                  outerRadius={70}
+                  innerRadius={38}
+                  outerRadius={58}
                   paddingAngle={3}
                   dataKey="value"
                   strokeWidth={1}
@@ -114,37 +114,35 @@ export default function CategoryChart({ categories }: CategoryChartProps) {
             </ResponsiveContainer>
           </div>
 
-          <div className="flex-1 space-y-2.5">
+          <div className="w-40 space-y-2 min-w-0">
             {data.map((item) => {
               const pct = ((item.value / total) * 100).toFixed(1);
               return (
-                <div key={item.key} className="flex items-center gap-3">
-                  <div
-                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                    style={{
-                      backgroundColor: item.color,
-                      boxShadow: `0 0 8px ${item.color}60`,
-                    }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-text-primary truncate">
-                        {item.name}
-                      </span>
-                      <span className="text-xs text-text-muted ml-2 flex-shrink-0">
-                        {pct}%
-                      </span>
-                    </div>
-                    <div className="w-full h-2 bg-border/50 rounded-full mt-1 overflow-hidden">
-                      <div
-                        className="h-full rounded-full animate-grow"
-                        style={{
-                          width: `${pct}%`,
-                          background: `linear-gradient(90deg, ${item.color}cc, ${item.color})`,
-                          boxShadow: `0 0 10px ${item.color}40, inset 0 1px 0 rgba(255,255,255,0.15)`,
-                        }}
-                      />
-                    </div>
+                <div key={item.key}>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <div
+                      className="w-2 h-2 rounded-full flex-shrink-0"
+                      style={{
+                        backgroundColor: item.color,
+                        boxShadow: `0 0 6px ${item.color}60`,
+                      }}
+                    />
+                    <span className="text-xs text-text-primary truncate">
+                      {item.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="h-2 rounded-full animate-grow"
+                      style={{
+                        width: `${pct}%`,
+                        background: `linear-gradient(90deg, ${item.color}cc, ${item.color})`,
+                        boxShadow: `0 0 8px ${item.color}40, inset 0 1px 0 rgba(255,255,255,0.15)`,
+                      }}
+                    />
+                    <span className="text-[10px] text-text-muted flex-shrink-0">
+                      {pct}%
+                    </span>
                   </div>
                 </div>
               );
