@@ -3,6 +3,21 @@
 import { useState, useEffect } from "react";
 import { useSettings } from "./SettingsContext";
 import type { TimelineRange } from "@/types";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
+import { Slider } from "./ui/slider";
+import { Switch } from "./ui/switch";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "./ui/select";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -49,95 +64,6 @@ function SettingRow({
   );
 }
 
-function Toggle({
-  checked,
-  onChange,
-}: {
-  checked: boolean;
-  onChange: (val: boolean) => void;
-}) {
-  return (
-    <button
-      onClick={() => onChange(!checked)}
-      className="relative w-11 h-6 rounded-full transition-all duration-200"
-      style={{
-        background: checked
-          ? "linear-gradient(135deg, #8b5cf6, #6d28d9)"
-          : "rgba(38, 38, 64, 0.8)",
-        boxShadow: checked
-          ? "0 0 12px rgba(139, 92, 246, 0.3), inset 0 1px 0 rgba(255,255,255,0.1)"
-          : "inset 0 2px 4px rgba(0,0,0,0.3)",
-      }}
-    >
-      <div
-        className="absolute top-0.5 w-5 h-5 rounded-full transition-all duration-200"
-        style={{
-          left: checked ? "22px" : "2px",
-          background: "linear-gradient(180deg, #fff, #e4e4e7)",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
-        }}
-      />
-    </button>
-  );
-}
-
-function SliderInput({
-  value,
-  onChange,
-  min,
-  max,
-  step,
-  formatLabel,
-}: {
-  value: number;
-  onChange: (val: number) => void;
-  min: number;
-  max: number;
-  step: number;
-  formatLabel?: (val: number) => string;
-}) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="text-xs text-accent font-mono min-w-[50px] text-right">
-        {formatLabel ? formatLabel(value) : value}
-      </span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-32 accent-accent"
-      />
-    </div>
-  );
-}
-
-function SelectInput({
-  value,
-  onChange,
-  options,
-}: {
-  value: string;
-  onChange: (val: string) => void;
-  options: { value: string; label: string }[];
-}) {
-  return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="px-3 py-1.5 rounded-lg text-sm border border-border bg-surface-hover text-text-primary focus:outline-none focus:border-accent"
-    >
-      {options.map((opt) => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
-        </option>
-      ))}
-    </select>
-  );
-}
-
 // ─── Main Component ───
 
 export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
@@ -148,8 +74,6 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     setProductiveAppsInput(settings.productiveApps.join(", "));
   }, [settings.productiveApps]);
 
-  if (!isOpen) return null;
-
   const handleProductiveAppsBlur = () => {
     const apps = productiveAppsInput
       .split(",")
@@ -159,51 +83,11 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      onClick={onClose}
-    >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-
-      {/* Modal */}
-      <div
-        className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl"
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          background:
-            "linear-gradient(145deg, rgba(18,18,26,0.98), rgba(26,26,46,0.95))",
-          border: "1px solid var(--color-border)",
-          boxShadow:
-            "0 24px 80px rgba(0,0,0,0.6), 0 0 40px rgba(139,92,246,0.05), inset 0 1px 0 rgba(255,255,255,0.05)",
-        }}
-      >
-        {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-border"
-          style={{
-            background: "linear-gradient(145deg, rgba(18,18,26,0.98), rgba(26,26,46,0.95))",
-          }}
-        >
-          <h2 className="text-lg font-bold text-text-primary">Settings</h2>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg hover:bg-surface-hover transition-colors text-text-muted hover:text-text-primary"
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Settings</DialogTitle>
+        </DialogHeader>
 
         <div className="px-6 py-5 space-y-8">
           {/* ── Alerts & Thresholds ── */}
@@ -214,32 +98,42 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 label="Productivity score alert"
                 description="Warn when your score drops below this level"
               >
-                <SliderInput
-                  value={settings.productivityScoreThreshold}
-                  onChange={(v) =>
-                    updateSettings({ productivityScoreThreshold: v })
-                  }
-                  min={10}
-                  max={90}
-                  step={5}
-                  formatLabel={(v) => `${v}%`}
-                />
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-accent font-mono min-w-[50px] text-right">
+                    {settings.productivityScoreThreshold}%
+                  </span>
+                  <Slider
+                    value={[settings.productivityScoreThreshold]}
+                    onValueChange={([v]) =>
+                      updateSettings({ productivityScoreThreshold: v })
+                    }
+                    min={10}
+                    max={90}
+                    step={5}
+                    className="w-32"
+                  />
+                </div>
               </SettingRow>
 
               <SettingRow
                 label="Entertainment time limit"
                 description="Daily max before you get a warning"
               >
-                <SliderInput
-                  value={settings.entertainmentTimeLimit}
-                  onChange={(v) =>
-                    updateSettings({ entertainmentTimeLimit: v })
-                  }
-                  min={900}
-                  max={14400}
-                  step={900}
-                  formatLabel={formatTime}
-                />
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-accent font-mono min-w-[50px] text-right">
+                    {formatTime(settings.entertainmentTimeLimit)}
+                  </span>
+                  <Slider
+                    value={[settings.entertainmentTimeLimit]}
+                    onValueChange={([v]) =>
+                      updateSettings({ entertainmentTimeLimit: v })
+                    }
+                    min={900}
+                    max={14400}
+                    step={900}
+                    className="w-32"
+                  />
+                </div>
               </SettingRow>
             </div>
           </section>
@@ -252,32 +146,42 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 label="Productive time goal"
                 description="Target hours of productive work per day"
               >
-                <SliderInput
-                  value={settings.dailyProductiveGoal}
-                  onChange={(v) =>
-                    updateSettings({ dailyProductiveGoal: v })
-                  }
-                  min={3600}
-                  max={43200}
-                  step={1800}
-                  formatLabel={formatTime}
-                />
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-accent font-mono min-w-[50px] text-right">
+                    {formatTime(settings.dailyProductiveGoal)}
+                  </span>
+                  <Slider
+                    value={[settings.dailyProductiveGoal]}
+                    onValueChange={([v]) =>
+                      updateSettings({ dailyProductiveGoal: v })
+                    }
+                    min={3600}
+                    max={43200}
+                    step={1800}
+                    className="w-32"
+                  />
+                </div>
               </SettingRow>
 
               <SettingRow
                 label="Screen time cap"
                 description="Max total screen time per day"
               >
-                <SliderInput
-                  value={settings.dailyScreenTimeCap}
-                  onChange={(v) =>
-                    updateSettings({ dailyScreenTimeCap: v })
-                  }
-                  min={7200}
-                  max={57600}
-                  step={1800}
-                  formatLabel={formatTime}
-                />
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-accent font-mono min-w-[50px] text-right">
+                    {formatTime(settings.dailyScreenTimeCap)}
+                  </span>
+                  <Slider
+                    value={[settings.dailyScreenTimeCap]}
+                    onValueChange={([v]) =>
+                      updateSettings({ dailyScreenTimeCap: v })
+                    }
+                    min={7200}
+                    max={57600}
+                    step={1800}
+                    className="w-32"
+                  />
+                </div>
               </SettingRow>
             </div>
           </section>
@@ -308,9 +212,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 label="Working hours"
                 description="Only count activity within these hours for scoring"
               >
-                <Toggle
+                <Switch
                   checked={settings.workingHoursEnabled}
-                  onChange={(v) =>
+                  onCheckedChange={(v) =>
                     updateSettings({ workingHoursEnabled: v })
                   }
                 />
@@ -319,27 +223,51 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               {settings.workingHoursEnabled && (
                 <SettingRow label="Hours range">
                   <div className="flex items-center gap-2 text-sm">
-                    <SelectInput
+                    <Select
                       value={String(settings.workingHoursStart)}
-                      onChange={(v) =>
+                      onValueChange={(v) =>
                         updateSettings({ workingHoursStart: Number(v) })
                       }
-                      options={Array.from({ length: 24 }, (_, i) => ({
-                        value: String(i),
-                        label: `${i === 0 ? "12" : i > 12 ? String(i - 12) : String(i)} ${i < 12 ? "AM" : "PM"}`,
-                      }))}
-                    />
+                    >
+                      <SelectTrigger className="w-[100px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 24 }, (_, i) => (
+                          <SelectItem key={i} value={String(i)}>
+                            {i === 0
+                              ? "12"
+                              : i > 12
+                                ? String(i - 12)
+                                : String(i)}{" "}
+                            {i < 12 ? "AM" : "PM"}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <span className="text-text-muted">to</span>
-                    <SelectInput
+                    <Select
                       value={String(settings.workingHoursEnd)}
-                      onChange={(v) =>
+                      onValueChange={(v) =>
                         updateSettings({ workingHoursEnd: Number(v) })
                       }
-                      options={Array.from({ length: 24 }, (_, i) => ({
-                        value: String(i),
-                        label: `${i === 0 ? "12" : i > 12 ? String(i - 12) : String(i)} ${i < 12 ? "AM" : "PM"}`,
-                      }))}
-                    />
+                    >
+                      <SelectTrigger className="w-[100px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 24 }, (_, i) => (
+                          <SelectItem key={i} value={String(i)}>
+                            {i === 0
+                              ? "12"
+                              : i > 12
+                                ? String(i - 12)
+                                : String(i)}{" "}
+                            {i < 12 ? "AM" : "PM"}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </SettingRow>
               )}
@@ -354,9 +282,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 label="Browser notifications"
                 description="Show desktop notifications for alerts"
               >
-                <Toggle
+                <Switch
                   checked={settings.browserNotifications}
-                  onChange={(v) =>
+                  onCheckedChange={(v) =>
                     updateSettings({ browserNotifications: v })
                   }
                 />
@@ -366,9 +294,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 label="Sound alerts"
                 description="Play a sound when critical alerts fire"
               >
-                <Toggle
+                <Switch
                   checked={settings.soundAlerts}
-                  onChange={(v) => updateSettings({ soundAlerts: v })}
+                  onCheckedChange={(v) => updateSettings({ soundAlerts: v })}
                 />
               </SettingRow>
 
@@ -376,16 +304,21 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 label="Notification cooldown"
                 description="Minimum time between repeated alerts"
               >
-                <SliderInput
-                  value={settings.notificationCooldown}
-                  onChange={(v) =>
-                    updateSettings({ notificationCooldown: v })
-                  }
-                  min={300}
-                  max={3600}
-                  step={300}
-                  formatLabel={formatTime}
-                />
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-accent font-mono min-w-[50px] text-right">
+                    {formatTime(settings.notificationCooldown)}
+                  </span>
+                  <Slider
+                    value={[settings.notificationCooldown]}
+                    onValueChange={([v]) =>
+                      updateSettings({ notificationCooldown: v })
+                    }
+                    min={300}
+                    max={3600}
+                    step={300}
+                    className="w-32"
+                  />
+                </div>
               </SettingRow>
             </div>
           </section>
@@ -398,44 +331,52 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 label="Dashboard refresh rate"
                 description="How often the dashboard fetches new data"
               >
-                <SelectInput
+                <Select
                   value={String(settings.refreshRate)}
-                  onChange={(v) =>
+                  onValueChange={(v) =>
                     updateSettings({ refreshRate: Number(v) })
                   }
-                  options={[
-                    { value: "3000", label: "3 seconds" },
-                    { value: "5000", label: "5 seconds" },
-                    { value: "10000", label: "10 seconds" },
-                    { value: "30000", label: "30 seconds" },
-                    { value: "60000", label: "1 minute" },
-                  ]}
-                />
+                >
+                  <SelectTrigger className="w-[130px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="3000">3 seconds</SelectItem>
+                    <SelectItem value="5000">5 seconds</SelectItem>
+                    <SelectItem value="10000">10 seconds</SelectItem>
+                    <SelectItem value="30000">30 seconds</SelectItem>
+                    <SelectItem value="60000">1 minute</SelectItem>
+                  </SelectContent>
+                </Select>
               </SettingRow>
 
               <SettingRow
                 label="Default timeline range"
                 description="Which range to show when the dashboard loads"
               >
-                <SelectInput
+                <Select
                   value={settings.defaultTimelineRange}
-                  onChange={(v) =>
+                  onValueChange={(v) =>
                     updateSettings({
                       defaultTimelineRange: v as TimelineRange,
                     })
                   }
-                  options={[
-                    { value: "today", label: "Today" },
-                    { value: "3d", label: "Last 3 Days" },
-                    { value: "1w", label: "Last Week" },
-                    { value: "1m", label: "Last Month" },
-                  ]}
-                />
+                >
+                  <SelectTrigger className="w-[130px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="3d">Last 3 Days</SelectItem>
+                    <SelectItem value="1w">Last Week</SelectItem>
+                    <SelectItem value="1m">Last Month</SelectItem>
+                  </SelectContent>
+                </Select>
               </SettingRow>
             </div>
           </section>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

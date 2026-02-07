@@ -3,6 +3,7 @@
 import type { AppUsage, CategoryBreakdown, Category, UserSettings } from "@/types";
 import { CATEGORY_COLORS } from "@/types";
 import { formatDuration } from "@/lib/utils";
+import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
 
 interface DistractionAlertsProps {
   apps: AppUsage[];
@@ -157,50 +158,52 @@ export default function DistractionAlerts({
 
   if (alerts.length === 0) {
     return (
-      <div className="card h-full">
-        <h3 className="text-text-secondary text-sm font-medium mb-4">
-          Alerts & Insights
-        </h3>
-        <div className="flex items-center justify-center h-32 text-text-muted text-sm">
+      <Card className="h-full">
+        <CardHeader>
+          <CardTitle>Alerts & Insights</CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center h-32 text-text-muted text-sm">
           No alerts — you&apos;re doing great!
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="card h-full">
-      <h3 className="text-text-secondary text-sm font-medium mb-4">
-        Alerts & Insights
-      </h3>
-      <div className="space-y-2.5">
-        {alerts.map((alert, index) => (
-          <div
-            key={index}
-            className="flex items-start gap-3 p-3 rounded-xl border transition-all duration-200 hover:scale-[1.01]"
-            style={{
-              borderColor: `${alert.color}30`,
-              background: `linear-gradient(135deg, ${alert.color}08, ${alert.color}03)`,
-              boxShadow: `0 2px 12px ${alert.color}08, inset 0 1px 0 rgba(255,255,255,0.02)`,
-            }}
-          >
-            <span className="text-lg flex-shrink-0 mt-0.5">{alert.icon}</span>
-            <div className="flex-1 min-w-0">
-              <p
-                className="text-sm font-medium"
-                style={{ color: alert.color }}
-              >
-                {alert.message}
-              </p>
-              {alert.detail && (
-                <p className="text-xs text-text-muted mt-0.5">
-                  {alert.detail}
+    <Card className="h-full">
+      <CardHeader>
+        <CardTitle>Alerts & Insights</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2.5">
+          {alerts.map((alert, index) => (
+            <div
+              key={index}
+              className="flex items-start gap-3 p-3 rounded-xl border transition-all duration-200 hover:scale-[1.01]"
+              style={{
+                borderColor: `${alert.color}30`,
+                background: `linear-gradient(135deg, ${alert.color}08, ${alert.color}03)`,
+                boxShadow: `0 2px 12px ${alert.color}08, inset 0 1px 0 rgba(255,255,255,0.02)`,
+              }}
+            >
+              <span className="text-lg flex-shrink-0 mt-0.5">{alert.icon}</span>
+              <div className="flex-1 min-w-0">
+                <p
+                  className="text-sm font-medium"
+                  style={{ color: alert.color }}
+                >
+                  {alert.message}
                 </p>
-              )}
+                {alert.detail && (
+                  <p className="text-xs text-text-muted mt-0.5">
+                    {alert.detail}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-    </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

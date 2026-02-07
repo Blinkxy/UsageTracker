@@ -1,5 +1,8 @@
 "use client";
 
+import { Card } from "./ui/card";
+import { cn } from "@/lib/utils";
+
 interface StatCardProps {
   title: string;
   value: string;
@@ -18,7 +21,7 @@ export default function StatCard({
   accentColor = "text-accent",
 }: StatCardProps) {
   return (
-    <div className={`card h-full ${glowClass} group`}>
+    <Card className={cn("h-full group", glowClass)}>
       <div className="flex items-start justify-between mb-3">
         <span className="text-text-secondary text-sm font-medium">{title}</span>
         <span
@@ -37,6 +40,6 @@ export default function StatCard({
       {subtitle && (
         <div className="text-text-muted text-sm mt-1">{subtitle}</div>
       )}
-    </div>
+    </Card>
   );
 }

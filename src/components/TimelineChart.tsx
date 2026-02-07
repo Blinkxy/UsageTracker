@@ -12,6 +12,8 @@ import {
 import type { HourlyData, DailyData, TimelineRange } from "@/types";
 import { CATEGORY_COLORS } from "@/types";
 import { formatDuration } from "@/lib/utils";
+import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
+import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 
 interface TimelineChartProps {
   hours: HourlyData[];
@@ -22,9 +24,9 @@ interface TimelineChartProps {
 
 const RANGE_OPTIONS: { value: TimelineRange; label: string }[] = [
   { value: "today", label: "Today" },
-  { value: "3d", label: "Last 3 Days" },
-  { value: "1w", label: "Last Week" },
-  { value: "1m", label: "Last Month" },
+  { value: "3d", label: "3 Days" },
+  { value: "1w", label: "Week" },
+  { value: "1m", label: "Month" },
 ];
 
 export default function TimelineChart({
@@ -35,19 +37,16 @@ export default function TimelineChart({
 }: TimelineChartProps) {
   const isDaily = range !== "today";
 
-  // ── Range selector buttons ──
   const RangeSelector = () => (
-    <div className="flex items-center gap-2">
-      {RANGE_OPTIONS.map((opt) => (
-        <button
-          key={opt.value}
-          onClick={() => onRangeChange(opt.value)}
-          className={`range-btn ${range === opt.value ? "active" : ""}`}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
+    <Tabs value={range} onValueChange={(v) => onRangeChange(v as TimelineRange)}>
+      <TabsList>
+        {RANGE_OPTIONS.map((opt) => (
+          <TabsTrigger key={opt.value} value={opt.value}>
+            {opt.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
   );
 
   // ── Empty state ──
@@ -55,17 +54,15 @@ export default function TimelineChart({
     const hasData = days.length > 0 && days.some((d) => d.total > 0);
     if (!hasData) {
       return (
-        <div className="card h-full">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-text-secondary text-sm font-medium">
-              Activity Timeline
-            </h3>
+        <Card className="h-full">
+          <CardHeader className="flex flex-row items-center justify-between pb-4">
+            <CardTitle>Activity Timeline</CardTitle>
             <RangeSelector />
-          </div>
-          <div className="flex items-center justify-center h-48 text-text-muted text-sm">
+          </CardHeader>
+          <CardContent className="flex items-center justify-center h-48 text-text-muted text-sm">
             No activity recorded for this period.
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       );
     }
   } else {
@@ -75,18 +72,16 @@ export default function TimelineChart({
     );
     if (activeHours.length === 0 || activeHours.every((h) => h.total === 0)) {
       return (
-        <div className="card h-full">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-text-secondary text-sm font-medium">
-              Activity Timeline
-            </h3>
+        <Card className="h-full">
+          <CardHeader className="flex flex-row items-center justify-between pb-4">
+            <CardTitle>Activity Timeline</CardTitle>
             <RangeSelector />
-          </div>
-          <div className="flex items-center justify-center h-48 text-text-muted text-sm">
+          </CardHeader>
+          <CardContent className="flex items-center justify-center h-48 text-text-muted text-sm">
             No activity recorded yet — timeline will appear as you use your
             computer.
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       );
     }
   }
@@ -149,115 +144,62 @@ export default function TimelineChart({
     };
 
     return (
-      <div className="card h-full">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-text-secondary text-sm font-medium">
-            Activity Timeline
-          </h3>
+      <Card className="h-full">
+        <CardHeader className="flex flex-row items-center justify-between pb-4">
+          <CardTitle>Activity Timeline</CardTitle>
           <RangeSelector />
-        </div>
+        </CardHeader>
 
-        <div className="h-56">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={days}
-              margin={{ top: 5, right: 5, left: -10, bottom: 0 }}
-            >
-              <defs>
-                <linearGradient id="gradDailyProductive" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={CATEGORY_COLORS.productive} stopOpacity={0.5} />
-                  <stop offset="100%" stopColor={CATEGORY_COLORS.productive} stopOpacity={0.05} />
-                </linearGradient>
-                <linearGradient id="gradDailyCommunication" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={CATEGORY_COLORS.communication} stopOpacity={0.5} />
-                  <stop offset="100%" stopColor={CATEGORY_COLORS.communication} stopOpacity={0.05} />
-                </linearGradient>
-                <linearGradient id="gradDailyBrowsing" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={CATEGORY_COLORS.browsing} stopOpacity={0.5} />
-                  <stop offset="100%" stopColor={CATEGORY_COLORS.browsing} stopOpacity={0.05} />
-                </linearGradient>
-                <linearGradient id="gradDailyEntertainment" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={CATEGORY_COLORS.entertainment} stopOpacity={0.5} />
-                  <stop offset="100%" stopColor={CATEGORY_COLORS.entertainment} stopOpacity={0.05} />
-                </linearGradient>
-                <linearGradient id="gradDailyOther" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={CATEGORY_COLORS.other} stopOpacity={0.4} />
-                  <stop offset="100%" stopColor={CATEGORY_COLORS.other} stopOpacity={0.03} />
-                </linearGradient>
-                <filter id="glow">
-                  <feGaussianBlur stdDeviation="2" result="coloredBlur" />
-                  <feMerge>
-                    <feMergeNode in="coloredBlur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="rgba(38,38,64,0.5)"
-                vertical={false}
-              />
-              <XAxis
-                dataKey="label"
-                tick={{ fill: "#71717a", fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                tick={{ fill: "#71717a", fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={formatYAxis}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Area
-                type="monotone"
-                dataKey="other"
-                stackId="1"
-                stroke={CATEGORY_COLORS.other}
-                fill="url(#gradDailyOther)"
-                strokeWidth={1.5}
-              />
-              <Area
-                type="monotone"
-                dataKey="entertainment"
-                stackId="1"
-                stroke={CATEGORY_COLORS.entertainment}
-                fill="url(#gradDailyEntertainment)"
-                strokeWidth={2}
-                filter="url(#glow)"
-              />
-              <Area
-                type="monotone"
-                dataKey="browsing"
-                stackId="1"
-                stroke={CATEGORY_COLORS.browsing}
-                fill="url(#gradDailyBrowsing)"
-                strokeWidth={2}
-                filter="url(#glow)"
-              />
-              <Area
-                type="monotone"
-                dataKey="communication"
-                stackId="1"
-                stroke={CATEGORY_COLORS.communication}
-                fill="url(#gradDailyCommunication)"
-                strokeWidth={2}
-                filter="url(#glow)"
-              />
-              <Area
-                type="monotone"
-                dataKey="productive"
-                stackId="1"
-                stroke={CATEGORY_COLORS.productive}
-                fill="url(#gradDailyProductive)"
-                strokeWidth={2}
-                filter="url(#glow)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+        <CardContent>
+          <div className="h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={days}
+                margin={{ top: 5, right: 5, left: -10, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="gradDailyProductive" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={CATEGORY_COLORS.productive} stopOpacity={0.5} />
+                    <stop offset="100%" stopColor={CATEGORY_COLORS.productive} stopOpacity={0.05} />
+                  </linearGradient>
+                  <linearGradient id="gradDailyCommunication" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={CATEGORY_COLORS.communication} stopOpacity={0.5} />
+                    <stop offset="100%" stopColor={CATEGORY_COLORS.communication} stopOpacity={0.05} />
+                  </linearGradient>
+                  <linearGradient id="gradDailyBrowsing" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={CATEGORY_COLORS.browsing} stopOpacity={0.5} />
+                    <stop offset="100%" stopColor={CATEGORY_COLORS.browsing} stopOpacity={0.05} />
+                  </linearGradient>
+                  <linearGradient id="gradDailyEntertainment" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={CATEGORY_COLORS.entertainment} stopOpacity={0.5} />
+                    <stop offset="100%" stopColor={CATEGORY_COLORS.entertainment} stopOpacity={0.05} />
+                  </linearGradient>
+                  <linearGradient id="gradDailyOther" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={CATEGORY_COLORS.other} stopOpacity={0.4} />
+                    <stop offset="100%" stopColor={CATEGORY_COLORS.other} stopOpacity={0.03} />
+                  </linearGradient>
+                  <filter id="glow">
+                    <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                    <feMerge>
+                      <feMergeNode in="coloredBlur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(38,38,64,0.5)" vertical={false} />
+                <XAxis dataKey="label" tick={{ fill: "#71717a", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: "#71717a", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={formatYAxis} />
+                <Tooltip content={<CustomTooltip />} />
+                <Area type="monotone" dataKey="other" stackId="1" stroke={CATEGORY_COLORS.other} fill="url(#gradDailyOther)" strokeWidth={1.5} />
+                <Area type="monotone" dataKey="entertainment" stackId="1" stroke={CATEGORY_COLORS.entertainment} fill="url(#gradDailyEntertainment)" strokeWidth={2} filter="url(#glow)" />
+                <Area type="monotone" dataKey="browsing" stackId="1" stroke={CATEGORY_COLORS.browsing} fill="url(#gradDailyBrowsing)" strokeWidth={2} filter="url(#glow)" />
+                <Area type="monotone" dataKey="communication" stackId="1" stroke={CATEGORY_COLORS.communication} fill="url(#gradDailyCommunication)" strokeWidth={2} filter="url(#glow)" />
+                <Area type="monotone" dataKey="productive" stackId="1" stroke={CATEGORY_COLORS.productive} fill="url(#gradDailyProductive)" strokeWidth={2} filter="url(#glow)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -277,114 +219,61 @@ export default function TimelineChart({
   }));
 
   return (
-    <div className="card h-full">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-text-secondary text-sm font-medium">
-          Activity Timeline
-        </h3>
+    <Card className="h-full">
+      <CardHeader className="flex flex-row items-center justify-between pb-4">
+        <CardTitle>Activity Timeline</CardTitle>
         <RangeSelector />
-      </div>
+      </CardHeader>
 
-      <div className="h-56">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={chartData}
-            margin={{ top: 5, right: 5, left: -20, bottom: 0 }}
-          >
-            <defs>
-              <linearGradient id="gradProductive" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={CATEGORY_COLORS.productive} stopOpacity={0.5} />
-                <stop offset="100%" stopColor={CATEGORY_COLORS.productive} stopOpacity={0.05} />
-              </linearGradient>
-              <linearGradient id="gradCommunication" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={CATEGORY_COLORS.communication} stopOpacity={0.5} />
-                <stop offset="100%" stopColor={CATEGORY_COLORS.communication} stopOpacity={0.05} />
-              </linearGradient>
-              <linearGradient id="gradBrowsing" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={CATEGORY_COLORS.browsing} stopOpacity={0.5} />
-                <stop offset="100%" stopColor={CATEGORY_COLORS.browsing} stopOpacity={0.05} />
-              </linearGradient>
-              <linearGradient id="gradEntertainment" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={CATEGORY_COLORS.entertainment} stopOpacity={0.5} />
-                <stop offset="100%" stopColor={CATEGORY_COLORS.entertainment} stopOpacity={0.05} />
-              </linearGradient>
-              <linearGradient id="gradOther" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={CATEGORY_COLORS.other} stopOpacity={0.4} />
-                <stop offset="100%" stopColor={CATEGORY_COLORS.other} stopOpacity={0.03} />
-              </linearGradient>
-              <filter id="glowToday">
-                <feGaussianBlur stdDeviation="2" result="coloredBlur" />
-                <feMerge>
-                  <feMergeNode in="coloredBlur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="rgba(38,38,64,0.5)"
-              vertical={false}
-            />
-            <XAxis
-              dataKey="label"
-              tick={{ fill: "#71717a", fontSize: 11 }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              tick={{ fill: "#71717a", fontSize: 11 }}
-              axisLine={false}
-              tickLine={false}
-              tickFormatter={(v) => `${v}m`}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Area
-              type="monotone"
-              dataKey="other"
-              stackId="1"
-              stroke={CATEGORY_COLORS.other}
-              fill="url(#gradOther)"
-              strokeWidth={1.5}
-            />
-            <Area
-              type="monotone"
-              dataKey="entertainment"
-              stackId="1"
-              stroke={CATEGORY_COLORS.entertainment}
-              fill="url(#gradEntertainment)"
-              strokeWidth={2}
-              filter="url(#glowToday)"
-            />
-            <Area
-              type="monotone"
-              dataKey="browsing"
-              stackId="1"
-              stroke={CATEGORY_COLORS.browsing}
-              fill="url(#gradBrowsing)"
-              strokeWidth={2}
-              filter="url(#glowToday)"
-            />
-            <Area
-              type="monotone"
-              dataKey="communication"
-              stackId="1"
-              stroke={CATEGORY_COLORS.communication}
-              fill="url(#gradCommunication)"
-              strokeWidth={2}
-              filter="url(#glowToday)"
-            />
-            <Area
-              type="monotone"
-              dataKey="productive"
-              stackId="1"
-              stroke={CATEGORY_COLORS.productive}
-              fill="url(#gradProductive)"
-              strokeWidth={2}
-              filter="url(#glowToday)"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
+      <CardContent>
+        <div className="h-56">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={chartData}
+              margin={{ top: 5, right: 5, left: -20, bottom: 0 }}
+            >
+              <defs>
+                <linearGradient id="gradProductive" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={CATEGORY_COLORS.productive} stopOpacity={0.5} />
+                  <stop offset="100%" stopColor={CATEGORY_COLORS.productive} stopOpacity={0.05} />
+                </linearGradient>
+                <linearGradient id="gradCommunication" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={CATEGORY_COLORS.communication} stopOpacity={0.5} />
+                  <stop offset="100%" stopColor={CATEGORY_COLORS.communication} stopOpacity={0.05} />
+                </linearGradient>
+                <linearGradient id="gradBrowsing" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={CATEGORY_COLORS.browsing} stopOpacity={0.5} />
+                  <stop offset="100%" stopColor={CATEGORY_COLORS.browsing} stopOpacity={0.05} />
+                </linearGradient>
+                <linearGradient id="gradEntertainment" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={CATEGORY_COLORS.entertainment} stopOpacity={0.5} />
+                  <stop offset="100%" stopColor={CATEGORY_COLORS.entertainment} stopOpacity={0.05} />
+                </linearGradient>
+                <linearGradient id="gradOther" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={CATEGORY_COLORS.other} stopOpacity={0.4} />
+                  <stop offset="100%" stopColor={CATEGORY_COLORS.other} stopOpacity={0.03} />
+                </linearGradient>
+                <filter id="glowToday">
+                  <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(38,38,64,0.5)" vertical={false} />
+              <XAxis dataKey="label" tick={{ fill: "#71717a", fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: "#71717a", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}m`} />
+              <Tooltip content={<CustomTooltip />} />
+              <Area type="monotone" dataKey="other" stackId="1" stroke={CATEGORY_COLORS.other} fill="url(#gradOther)" strokeWidth={1.5} />
+              <Area type="monotone" dataKey="entertainment" stackId="1" stroke={CATEGORY_COLORS.entertainment} fill="url(#gradEntertainment)" strokeWidth={2} filter="url(#glowToday)" />
+              <Area type="monotone" dataKey="browsing" stackId="1" stroke={CATEGORY_COLORS.browsing} fill="url(#gradBrowsing)" strokeWidth={2} filter="url(#glowToday)" />
+              <Area type="monotone" dataKey="communication" stackId="1" stroke={CATEGORY_COLORS.communication} fill="url(#gradCommunication)" strokeWidth={2} filter="url(#glowToday)" />
+              <Area type="monotone" dataKey="productive" stackId="1" stroke={CATEGORY_COLORS.productive} fill="url(#gradProductive)" strokeWidth={2} filter="url(#glowToday)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
