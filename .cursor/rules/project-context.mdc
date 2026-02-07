@@ -1,0 +1,97 @@
+---
+description: Activity Tracker project context — architecture, tech stack, and current state
+alwaysApply: true
+---
+
+# Activity Tracker — Project Context
+
+## Overview
+A Linux desktop productivity dashboard that tracks which applications and browser tabs the user focuses on, classifies them by category (productive, entertainment, communication, browsing, other), and displays real-time analytics.
+
+**Owner**: blinkxy (mehdi.zoheir@gmail.com)
+**Repo**: git@github.com:Blinkxy/UsageTracker.git
+
+## Architecture
+
+### Dashboard (Dockerized)
+- **Next.js 15** + **React 19** + **Tailwind CSS v4** frontend
+- Runs in Docker alongside **PostgreSQL 16** via `docker-compose.yml`
+- Accessible at `http://localhost:3000`
+- Uses **Shadcn/ui** components (Card, Button, Dialog, Slider, Switch, Select, Tabs) with a custom dark glassmorphism theme
+- Charts via **Recharts**, icons via **lucide-react**
+
+### Tracker (Native on host)
+- TypeScript script (`tracker/index.ts`) that runs natively on the Linux host
+- Uses `xdotool`, `gdbus`, `hyprctl`, `swaymsg`, `kdotool` to detect the active window
+- Classifies apps/tabs by analyzing window titles (see `src/lib/categories.ts`)
+- Writes to PostgreSQL every time the focused window changes
+- Run with: `npx tsx tracker/index.ts &`
+
+### Database
+- PostgreSQL 16 in Docker, configured via `.env` file
+- Tables: `focus_events` (app tracking data), `user_settings` (JSON config)
+- Schema initialized by `scripts/init.sql`
+
+## Key Design Decisions
+
+1. **Productivity score uses CATEGORY, not app name** — YouTube on Brave = entertainment (lowers score), coding docs on Brave = productive (raises score). Classification is done by window title analysis in `src/lib/categories.ts`.
+
+2. **Tracker must be native** — it needs access to the display server (X11/Wayland) for `xdotool`/`gdbus`, so it can't run inside Docker.
+
+3. **All timestamps use UTC** (`new Date().toISOString()`) — both tracker and dashboard. Be aware of timezone offsets when debugging date-related issues (the Docker container runs in UTC, the host may be UTC+1).
+
+## File Structure
+
+```
+├── src/
+│   ├── app/                    # Next.js app router
+│   │   ├── api/summary/        # Daily summary + productivity score
+│   │   ├── api/usage/          # Per-app usage breakdown
+│   │   ├── api/timeline/       # Hourly/daily timeline data
+│   │   ├── api/settings/       # User settings CRUD
+│   │   ├── globals.css         # Global styles + CSS variables
+│   │   ├── layout.tsx          # Root layout (title: "Activity Tracker")
+│   │   └── page.tsx            # Wraps Dashboard with SettingsProvider
+│   ├── components/
+│   │   ├── ui/                 # Shadcn/ui primitives (card, button, dialog, etc.)
+│   │   ├── Dashboard.tsx       # Main dashboard layout and data fetching
+│   │   ├── StatCard.tsx        # Top stat cards (screen time, productive time, etc.)
+│   │   ├── ProductivityScore.tsx # Circular score gauge
+│   │   ├── CategoryChart.tsx   # Donut chart + legend bars
+│   │   ├── TopAppsChart.tsx    # Horizontal bar chart of top apps
+│   │   ├── TimelineChart.tsx   # Hourly/daily stacked area chart
+│   │   ├── AppUsageList.tsx    # Full app usage table
+│   │   ├── DistractionAlerts.tsx # Alerts and insights
+│   │   ├── SettingsModal.tsx   # Settings dialog with themed section cards
+│   │   ├── SettingsProvider.tsx # React context for settings
+│   │   └── useNotifications.ts # Browser notification hook
+│   ├── lib/
+│   │   ├── db.ts               # PostgreSQL queries (pg Pool)
+│   │   ├── categories.ts       # Window title → category classification
+│   │   └── utils.ts            # Helpers (formatDuration, productivity score, etc.)
+│   └── types/index.ts          # TypeScript types + DEFAULT_SETTINGS
+├── tracker/index.ts            # Native window tracker script
+├── scripts/init.sql            # PostgreSQL schema
+├── docker-compose.yml          # Dashboard + PostgreSQL services
+├── Dockerfile                  # Next.js standalone build
+├── .env                        # PostgreSQL credentials (not committed)
+└── .env.example                # Template for .env
+```
+
+## Starting the App
+
+```bash
+# Start dashboard + database
+docker compose up -d
+
+# Start tracker (native, in background)
+nohup npx tsx tracker/index.ts > tracker.log 2>&1 &
+```
+
+## Common Gotchas
+
+- **Port 3000 conflict**: Kill any lingering `next-server` processes before starting Docker
+- **After midnight bugs**: The timeline "Today" view filters hours dynamically — if something looks empty, check the hour range logic in `TimelineChart.tsx`
+- **Duplicate key warnings**: The `getAppUsage` query uses `GROUP BY LOWER(app_name)` and `AppUsageList` uses index-based keys to avoid React duplicate key errors
+- **Hook ordering**: `useNotifications` must be called before any conditional early returns in `Dashboard.tsx`
+- **Docker timezone**: Container runs UTC, host may differ — all date functions use `toISOString().split("T")[0]` for consistency
